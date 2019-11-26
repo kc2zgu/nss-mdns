@@ -250,7 +250,13 @@ enum nss_status convert_userdata_to_addrtuple(const userdata_t* u,
         memcpy(&(tuple->addr), &(result->address), address_length);
 
         // Assign interface scope id
-        tuple->scopeid = result->scopeid;
+        if (result->af == AF_INET6)
+        {
+            // only link-local addresses
+            if (result->address.ipv6.address[0] == 0xfe &&
+                (result->address.ipv6.address[1] & 0x80 == 0x80))
+                tuple->scopeid = result->scopeid;
+        }
 
         if (tuple_prev == NULL) {
             // This is the first tuple.
